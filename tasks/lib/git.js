@@ -46,7 +46,7 @@ exports.Git = function (grunt) {
         _.forEach(lstree.output.split("\n"), function (item) {
             if (item !== '') {
                 var fields = item.split(/\s+/);
-                tree[ fields[3].replace(params.cut, '') ] = fields[2];
+                tree[ fields[3].replace(params.prefix, '') ] = fields[2];
             }
         });
 

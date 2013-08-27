@@ -12,7 +12,7 @@ module.exports = function (grunt) {
     var ABBREV = 'abbrev',
         TREE   = 'tree',
         FILTER = 'filter',
-        CUT    = 'cut',
+        PREFIX = 'prefix',
         PATH   = 'path';
 
     var git = require("./lib/git").Git(grunt);
@@ -27,7 +27,7 @@ module.exports = function (grunt) {
         options[TREE]   = 'HEAD';
         options[FILTER] = '.(png|jpg|jpeg|gif)';
         options[PATH]   = 'root/i';
-        options[CUT]    = 'root';
+        options[PREFIX] = 'root';
 
         options = this.options(options);
 
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
         options[TREE]   = grunt.option(TREE)   || options[TREE];
         options[FILTER] = grunt.option(FILTER) || options[FILTER];
         options[PATH]   = grunt.option(PATH)   || options[PATH];
-        options[CUT]    = grunt.option(CUT)    || options[CUT];
+        options[PREFIX] = grunt.option(PREFIX) || options[PREFIX];
 
         // show options if verbose
         grunt.verbose.writeflags(options);
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
             tree:   options[TREE],
             abbrev: options[ABBREV],
             path:   options[PATH],
-            cut:    options[CUT]
+            prefix: options[PREFIX]
         };
         grunt.log.writeln("Building images revisions tree..");
 
@@ -105,9 +105,9 @@ module.exports = function (grunt) {
                 url = url.replace(/(\?(.*))/g, '');
 
                 // is file exists?
-                if (!fs.existsSync(options[CUT] + url)) {
+                if (!fs.existsSync(options[PREFIX] + url)) {
                     // TODO: grunt.fatal
-                    grunt.log.writeln("File for " + url + ' does not exist!');
+                    grunt.log.writeln("File for " + (url).yellow + ' does not exist!');
                     return url;
                 }
 
@@ -118,6 +118,7 @@ module.exports = function (grunt) {
                 return revisioned;
             });
 
+            grunt.log.writeln("");
             // grunt.file.write(filename, css);
             next();
         };
