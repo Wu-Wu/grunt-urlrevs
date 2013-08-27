@@ -16,6 +16,8 @@ module.exports = function (grunt) {
         PATH   = 'path';
 
     var git = require("./lib/git").Git(grunt);
+    var fs  = require('fs');
+    var util = require('util');
 
     grunt.registerMultiTask("urlrevs", "Manage revisions in css urls", function () {
 
@@ -72,8 +74,63 @@ module.exports = function (grunt) {
             }
         });
 
-        // not implemented yet
+        var files = this.filesSrc;
 
+        var changeUrls = function (filename, next) {
+            grunt.log.writeln('Processing ' + (filename).cyan);
+
+            var content = grunt.file.read(filename).toString();
+
+            var css = content.replace(/url(?:\s+)?\(([^\)]+)\)/igm, function (match, url) {
+                // trim spaces, quotes
+                url = url.replace(/^\s+|\s+$/g, '');
+                url = url.replace(/['"]/g, '');
+
+                // TODO: delete?
+                grunt.log.writeln(url);
+
+                if (/^(\s+)?$/.test(url)) {
+                    // TODO: grunt.fatal
+                    grunt.log.writeln("Empty URLs are not supported!");
+                    return url;
+                }
+
+                if (!/^\//.test(url)) {
+                    // TODO: grunt.fatal
+                    grunt.log.writeln("Relative URLs are not supported: " + url);
+                    return url;
+                }
+
+                // trim revision if any
+                url = url.replace(/(\?(.*))/g, '');
+
+                // is file exists?
+                if (!fs.existsSync(options[CUT] + url)) {
+                    // TODO: grunt.fatal
+                    grunt.log.writeln("File for " + url + ' does not exist!');
+                    return url;
+                }
+
+                var revisioned = util.format("url('%s?%s')", url, tree[url]);
+
+                grunt.log.writeln(" * " + revisioned);
+
+                return revisioned;
+            });
+
+            // grunt.file.write(filename, css);
+            next();
+        };
+
+        if (files.length > 0) {
+            grunt.log.writeln('Files to go: ' + files.length);
+
+            grunt.util.async.forEachLimit(files, 30, function (file, next) {
+                changeUrls(file, next);
+            }.bind(this), this.async());
+        }
+        else {
+            grunt.log.writeln('No files to processing');
+        }
     });
-
 };
