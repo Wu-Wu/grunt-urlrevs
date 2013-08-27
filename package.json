@@ -1,18 +1,18 @@
 {
-    "name": "grunt-contrib-urlrevs",
+    "name": "grunt-urlrevs",
     "description": "Manage revisions in CSS urls",
     "version": "0.5.1",
-    "homepage": "https://bitbucket.org/Wu-Wu/grunt-contrib-urlrevs",
+    "homepage": "https://github.com/Wu-Wu/grunt-urlrevs",
     "author": {
         "name": "Anton Gerasimov",
         "email": "a.gerasimov@reg.ru"
     },
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/Wu-Wu/grunt-contrib-urlrevs.git"
+        "url": "https://github.com/Wu-Wu/grunt-urlrevs.git"
     },
     "bugs": {
-        "url": "https://bitbucket.org/Wu-Wu/grunt-contrib-urlrevs/issues"
+        "url": "https://github.com/Wu-Wu/grunt-urlrevs/issues"
     },
     "licenses": [
         {

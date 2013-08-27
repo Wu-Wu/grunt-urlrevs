@@ -1,6 +1,6 @@
 /*
- * grunt-contrib-urlrevs
- * https://bitbucket.org/Wu-Wu/grunt-contrib-urlrevs
+ * grunt-urlrevs
+ * https://github.com/Wu-Wu/grunt-urlrevs
  *
  * Copyright (c) 2013 Anton Gerasimov
  * Licensed under the MIT license.
