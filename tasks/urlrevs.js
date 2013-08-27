@@ -40,7 +40,7 @@ module.exports = function (grunt) {
         // show options if verbose
         grunt.verbose.writeflags(options);
 
-        grunt.log.writeln("Verifying uncommited changes..");
+        grunt.verbose.writeln("Verifying uncommited changes..");
 
         git.status(options[FILTER], function (output, code) {
             if (!code) {
@@ -60,7 +60,7 @@ module.exports = function (grunt) {
             path:   options[PATH],
             prefix: options[PREFIX]
         };
-        grunt.log.writeln("Building images revisions tree..");
+        grunt.verbose.writeln("Building images revisions tree..");
 
         var tree = {};
 
@@ -121,7 +121,6 @@ module.exports = function (grunt) {
         };
 
         if (files.length > 0) {
-            // grunt.log.writeln('Files to go: ' + files.length);
             grunt.util.async.forEachLimit(files, 30, function (file, next) {
                 changeUrls(file, next);
             }.bind(this), this.async());
