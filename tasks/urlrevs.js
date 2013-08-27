@@ -10,7 +10,7 @@
 
 module.exports = function (grunt) {
     var ABBREV = 'abbrev',
-        TREE   = 'tree',
+        BRANCH = 'branch',
         FILTER = 'filter',
         PREFIX = 'prefix',
         PATH   = 'path';
@@ -24,7 +24,7 @@ module.exports = function (grunt) {
         var options = {};
         // defaults
         options[ABBREV] = 6;
-        options[TREE]   = 'HEAD';
+        options[BRANCH] = 'HEAD';
         options[FILTER] = '.(png|jpg|jpeg|gif)';
         options[PATH]   = 'root/i';
         options[PREFIX] = 'root';
@@ -32,7 +32,7 @@ module.exports = function (grunt) {
         options = this.options(options);
 
         options[ABBREV] = grunt.option(ABBREV) || options[ABBREV];
-        options[TREE]   = grunt.option(TREE)   || options[TREE];
+        options[BRANCH] = grunt.option(BRANCH) || options[BRANCH];
         options[FILTER] = grunt.option(FILTER) || options[FILTER];
         options[PATH]   = grunt.option(PATH)   || options[PATH];
         options[PREFIX] = grunt.option(PREFIX) || options[PREFIX];
@@ -55,7 +55,7 @@ module.exports = function (grunt) {
         });
 
         var lstree_opts = {
-            tree:   options[TREE],
+            branch: options[BRANCH],
             abbrev: options[ABBREV],
             path:   options[PATH],
             prefix: options[PREFIX]

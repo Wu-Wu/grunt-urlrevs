@@ -38,7 +38,7 @@ exports.Git = function (grunt) {
     // repository "git ls-tree"
     exports.lsTree = function (params, callback) {
         var lstree = runCommand(
-            [ 'git', 'ls-tree', '-r', '--abbrev=' + params.abbrev, params.tree, params.path ]
+            [ 'git', 'ls-tree', '-r', '--abbrev=' + params.abbrev, params.branch, params.path ]
         );
 
         var tree = {};
