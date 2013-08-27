@@ -21,8 +21,11 @@
         }
     ],
     "main": "Gruntfile.js",
+    "scripts": {
+        "test": "grunt test"
+    },
     "engines": {
-        "node": ">= 0.10.0"
+        "node": ">= 0.8.0"
     },
     "dependencies": {
         "shelljs": "~0.1.4"
