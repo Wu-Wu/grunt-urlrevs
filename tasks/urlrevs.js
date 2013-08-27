@@ -13,7 +13,8 @@ module.exports = function (grunt) {
         BRANCH = 'branch',
         FILTER = 'filter',
         PREFIX = 'prefix',
-        PATH   = 'path';
+        PATH   = 'path',
+        VALID  = 'valid';
 
     var git  = require('./lib/git').Git(grunt),
         fs   = require('fs'),
@@ -28,6 +29,7 @@ module.exports = function (grunt) {
         options[FILTER] = '\\.(png|jpg|jpeg|gif)';
         options[PATH]   = 'root/i';
         options[PREFIX] = 'root';
+        options[VALID]  = [ '^\\/' ];
 
         options = this.options(options);
 
@@ -36,6 +38,7 @@ module.exports = function (grunt) {
         options[FILTER] = grunt.option(FILTER) || options[FILTER];
         options[PATH]   = grunt.option(PATH)   || options[PATH];
         options[PREFIX] = grunt.option(PREFIX) || options[PREFIX];
+        options[VALID]  = grunt.option(VALID)  || options[VALID];
 
         // show options if verbose
         grunt.verbose.writeflags(options);
@@ -75,8 +78,11 @@ module.exports = function (grunt) {
         });
 
         var files = this.filesSrc;
+        var _ = grunt.util._;
 
         var regex = new RegExp(options[FILTER], 'i');
+
+        var reCompiled = _.map(options[VALID], function (re) { return new RegExp(re, 'i'); });
 
         var changeUrls = function (filename, next) {
             grunt.log.writeln("Processing " + (filename).cyan + "...");
@@ -94,8 +100,10 @@ module.exports = function (grunt) {
                     grunt.fatal("Empty URLs are not supported!");
                 }
 
-                if (!/^\//.test(url)) {
-                    grunt.fatal("Relative URLs are not supported: " + url);
+                // is valid url?
+                var isValid = _.some(reCompiled, function (re) { return re.test(url); });
+                if (!isValid) {
+                    grunt.fatal("Invalid URL: " + url);
                 }
 
                 // is file an image?

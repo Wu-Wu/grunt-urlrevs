@@ -76,6 +76,12 @@ Default value: `root/i`
 
 Path to search files in stage of building tree. Relative to repository root directory.
 
+#### options.valid
+Type: `Array`
+Default value: `[ '^\\/' ]`
+
+All valid URL masks represented as a list of `RexExp`.
+
 ### Usage Examples
 
 ```js
