@@ -8,12 +8,18 @@
 
 "use strict";
 
+var Shell = require("shelljs");
+
 exports.Git = function (grunt) {
     var exports = {};
 
+    var _ = grunt.util._;
+
     // repository "git status"
-    exports.status = function () {
-        return true;
+    exports.status = function (callback) {
+        // TODO: uncommited images only
+        var status = Shell.exec("git status --porcelain", { silent: true });
+        callback(_.without(status.output.split("\n"), ''), status.code);
     };
 
     // repository "git ls-tree"
