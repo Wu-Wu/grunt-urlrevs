@@ -25,7 +25,7 @@ module.exports = function (grunt) {
         // defaults
         options[ABBREV] = 6;
         options[BRANCH] = 'HEAD';
-        options[FILTER] = '.(png|jpg|jpeg|gif)';
+        options[FILTER] = '\\.(png|jpg|jpeg|gif)';
         options[PATH]   = 'root/i';
         options[PREFIX] = 'root';
 
