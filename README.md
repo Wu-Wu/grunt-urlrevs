@@ -1,13 +1,106 @@
 grunt-contrib-urlrevs
 =====================
 
-Manage revisions in CSS urls.
-
-TBD
+> Manage revisions in CSS urls.
 
 ## Getting Started
 
-## Overview
+This plugin requires Grunt ~0.4.0
 
-## Options
+If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
+```shell
+npm install grunt-contrib-urlrevs
+```
+
+One the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
+
+```js
+grunt.loadNpmTasks('grunt-contrib-urlrevs');
+```
+
+## The "urlrevs" task
+
+Builds image revisions tree, finds CSS files and replaces each occurences of links to images in `url()` directives.
+
+### Overview
+
+In your project's Gruntfile, add a section named `urlrevs` to the data object passed into `grunt.initConfig()`.
+
+```js
+grunt.initConfig({
+    urlrevs: {
+        some_target: {
+            options: {
+                // Target-specific options go here.
+            },
+            src: [
+                // Specify the files you want to edit
+            ]
+        }
+    }
+})
+```
+
+Each target defines a specific task that can be run.
+
+### Options
+
+#### options.abbrev
+Type: `Integer`
+Default value: `6`
+
+The length of the revision.
+
+#### options.branch
+Type: `String`
+Default value: `HEAD`
+
+Traversed branch.
+
+#### options.filter
+Type: `RegExp`
+Default value: `\\.(png|jpg|jpeg|gif)`
+
+Regular expression to filter files in stage of building revisions tree and replacing revisions in urls.
+
+#### options.prefix
+Type: `String`
+Default value: `root`
+
+Prefix to cut when generate absulute image url.
+
+#### options.path
+Type: `String`
+Default value: `root/i`
+
+Path to search files in stage of building tree. Relative to repository root directory.
+
+### Usage Examples
+
+```js
+grunt.initConfig({
+    urlrevs: {
+        live: {
+            options: {
+                abbrev: 6,
+                branch: 'HEAD',
+                filter: '\\.(png|jpg|jpeg|gif|bmp)',
+                prefix: 'root',
+                path: 'root/i'
+            },
+            src: [
+                'root/css/**/*.css'
+            ]
+        }
+    },
+});
+
+grunt.loadNpmTasks('grunt-contrib-urlrevs');
+grunt.registerTask('default', ['urlrevs:live']);
+```
+
+## License
+_grunt-contrib-urlrevs_ is licensed under the [MIT license][].
+
+[MIT license]: http://www.tldrlegal.com/license/mit-license
