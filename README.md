@@ -78,9 +78,15 @@ Path to search files in stage of building tree. Relative to repository root dire
 
 #### options.valid
 Type: `Array`
-Default value: `[ '^\\/' ]`
+Default value: `[ '^\\/', '^https?:\\/\\/' ]`
 
-All valid URL masks represented as a list of `RexExp`.
+All valid URL masks represented as a list of `RexExp`-like strings.
+
+#### options.skip
+Type: `Array`
+Default value: `[ '^https?:\\/\\/' ]`
+
+Defined URL masks which should be excluded during processing. Represented as a list of `RexExp`-like strings.
 
 ### Usage Examples
 
@@ -93,7 +99,9 @@ grunt.initConfig({
                 branch: 'HEAD',
                 filter: '\\.(png|jpg|jpeg|gif|bmp)',
                 prefix: 'root',
-                path: 'root/i'
+                path: 'root/i',
+                valid: [ '^\\/', '^https?:\\/\\/' ],
+                skip: [ '^https?:\\/\\/' ]
             },
             src: [
                 'root/css/**/*.css'
