@@ -14,7 +14,8 @@ module.exports = function (grunt) {
         FILTER = 'filter',
         PREFIX = 'prefix',
         PATH   = 'path',
-        VALID  = 'valid';
+        VALID  = 'valid',
+        SKIP   = 'skip';
 
     var git  = require('./lib/git').Git(grunt),
         fs   = require('fs'),
@@ -29,7 +30,8 @@ module.exports = function (grunt) {
         options[FILTER] = '\\.(png|jpg|jpeg|gif)';
         options[PATH]   = 'root/i';
         options[PREFIX] = 'root';
-        options[VALID]  = [ '^\\/' ];
+        options[VALID]  = [ '^\\/', '^https?:\\/\\/' ];
+        options[SKIP]   = [ '^https?:\\/\\/' ];
 
         options = this.options(options);
 
@@ -39,6 +41,7 @@ module.exports = function (grunt) {
         options[PATH]   = grunt.option(PATH)   || options[PATH];
         options[PREFIX] = grunt.option(PREFIX) || options[PREFIX];
         options[VALID]  = grunt.option(VALID)  || options[VALID];
+        options[SKIP]   = grunt.option(SKIP)   || options[SKIP];
 
         // show options if verbose
         grunt.verbose.writeflags(options);
@@ -77,12 +80,18 @@ module.exports = function (grunt) {
             }
         });
 
+        // creates RegExp object from string
+        var reCreateNew = function (re) {
+            return new RegExp(re, 'i');
+        };
+
         var files = this.filesSrc;
         var _ = grunt.util._;
 
-        var regex = new RegExp(options[FILTER], 'i');
-
-        var reCompiled = _.map(options[VALID], function (re) { return new RegExp(re, 'i'); });
+        // compile some regexes..
+        var reFilter = reCreateNew(options[FILTER]),       // ..images
+            reValid  = _.map(options[VALID], reCreateNew), // ..allowed urls
+            reSkip   = _.map(options[SKIP], reCreateNew);  // ..skipped urls
 
         var changeUrls = function (filename, next) {
             grunt.log.writeln("Processing " + (filename).cyan + "...");
@@ -101,13 +110,13 @@ module.exports = function (grunt) {
                 }
 
                 // is valid url?
-                var isValid = _.some(reCompiled, function (re) { return re.test(url); });
+                var isValid = _.some(reValid, function (re) { return re.test(url); });
                 if (!isValid) {
                     grunt.fatal("Invalid URL: " + url);
                 }
 
-                // is file an image?
-                if (regex.test(url)) {
+                // is file an image and should not be skipped?
+                if (reFilter.test(url) && !_.some(reSkip, function (re) { return re.test(url); })) {
                     // trim revision if any
                     url = url.replace(/(\?(.*))/g, '');
 
@@ -118,7 +127,7 @@ module.exports = function (grunt) {
                     return util.format("url('%s?%s')", url, tree[url]);
                 }
                 else {
-                    // not image - without revision
+                    // not image or should be skipped
                     return util.format("url('%s')", url);
                 }
             });
