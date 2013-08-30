@@ -21,8 +21,8 @@ module.exports = function (grunt) {
             filter : '\\.(png|jpg|jpeg|gif)',
             path   : 'root/i',
             prefix : 'root',
-            valid  : [ '^\\/', '^https?:\\/\\/' ],
-            skip   : [ '^https?:\\/\\/' ]
+            valid  : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
+            skip   : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ]
         });
 
         // show options if verbose
