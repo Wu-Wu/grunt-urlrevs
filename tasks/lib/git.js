@@ -38,7 +38,7 @@ exports.Git = function (grunt) {
     // repository "git ls-tree"
     exports.lsTree = function (params, callback) {
         var lstree = runCommand(
-            [ 'git', 'ls-tree', '-r', '--abbrev=' + params.abbrev, params.branch, params.path ]
+            [ 'git', 'ls-tree', '-r', '--abbrev=12', params.branch, params.path ]
         );
 
         var tree = {};
@@ -46,7 +46,7 @@ exports.Git = function (grunt) {
         _.forEach(lstree.output.split("\n"), function (item) {
             if (item !== '') {
                 var fields = item.split(/\s+/);
-                tree[ fields[3].replace(params.prefix, '') ] = fields[2];
+                tree[ fields[3].replace(params.prefix, '') ] = fields[2].substring(0, params.abbrev);
             }
         });
 

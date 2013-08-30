@@ -1,7 +1,7 @@
 {
     "name": "grunt-urlrevs",
     "description": "Manage revisions in CSS urls",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "homepage": "https://github.com/Wu-Wu/grunt-urlrevs",
     "author": {
         "name": "Anton Gerasimov",

@@ -9,46 +9,28 @@
 "use strict";
 
 module.exports = function (grunt) {
-    var ABBREV = 'abbrev',
-        BRANCH = 'branch',
-        FILTER = 'filter',
-        PREFIX = 'prefix',
-        PATH   = 'path',
-        VALID  = 'valid',
-        SKIP   = 'skip';
-
     var git  = require('./lib/git').Git(grunt),
         fs   = require('fs'),
         util = require('util');
 
     grunt.registerMultiTask("urlrevs", "Manage revisions in css urls", function () {
 
-        var options = {};
-        // defaults
-        options[ABBREV] = 6;
-        options[BRANCH] = 'HEAD';
-        options[FILTER] = '\\.(png|jpg|jpeg|gif)';
-        options[PATH]   = 'root/i';
-        options[PREFIX] = 'root';
-        options[VALID]  = [ '^\\/', '^https?:\\/\\/' ];
-        options[SKIP]   = [ '^https?:\\/\\/' ];
-
-        options = this.options(options);
-
-        options[ABBREV] = grunt.option(ABBREV) || options[ABBREV];
-        options[BRANCH] = grunt.option(BRANCH) || options[BRANCH];
-        options[FILTER] = grunt.option(FILTER) || options[FILTER];
-        options[PATH]   = grunt.option(PATH)   || options[PATH];
-        options[PREFIX] = grunt.option(PREFIX) || options[PREFIX];
-        options[VALID]  = grunt.option(VALID)  || options[VALID];
-        options[SKIP]   = grunt.option(SKIP)   || options[SKIP];
+        var options = this.options({
+            abbrev : 6,
+            branch : 'HEAD',
+            filter : '\\.(png|jpg|jpeg|gif)',
+            path   : 'root/i',
+            prefix : 'root',
+            valid  : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
+            skip   : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ]
+        });
 
         // show options if verbose
         grunt.verbose.writeflags(options);
 
         grunt.verbose.writeln("Verifying uncommited changes..");
 
-        git.status(options[FILTER], function (output, code) {
+        git.status(options.filter, function (output, code) {
             if (!code) {
                 if (output.length) {
                     grunt.verbose.writeln("Uncommited changes:\n" + output.join("\n"));
@@ -61,10 +43,10 @@ module.exports = function (grunt) {
         });
 
         var lstree_opts = {
-            branch: options[BRANCH],
-            abbrev: options[ABBREV],
-            path:   options[PATH],
-            prefix: options[PREFIX]
+            branch: options.branch,
+            abbrev: options.abbrev,
+            path:   options.path,
+            prefix: options.prefix
         };
         grunt.verbose.writeln("Building images revisions tree..");
 
@@ -89,9 +71,9 @@ module.exports = function (grunt) {
         var _ = grunt.util._;
 
         // compile some regexes..
-        var reFilter = reCreateNew(options[FILTER]),       // ..images
-            reValid  = _.map(options[VALID], reCreateNew), // ..allowed urls
-            reSkip   = _.map(options[SKIP], reCreateNew);  // ..skipped urls
+        var reFilter = reCreateNew(options.filter),       // ..images
+            reValid  = _.map(options.valid, reCreateNew), // ..allowed urls
+            reSkip   = _.map(options.skip, reCreateNew);  // ..skipped urls
 
         var changeUrls = function (filename, next) {
             grunt.log.writeln("Processing " + (filename).cyan + "...");
@@ -121,7 +103,7 @@ module.exports = function (grunt) {
                     url = url.replace(/(\?(.*))/g, '');
 
                     // is file exists?
-                    if (!fs.existsSync(options[PREFIX] + url)) {
+                    if (!fs.existsSync(options.prefix + url)) {
                         grunt.fatal("File for " + url + " does not exist!");
                     }
                     return util.format("url('%s?%s')", url, tree[url]);

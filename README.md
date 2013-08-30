@@ -5,7 +5,7 @@ grunt-urlrevs
 
 ## Getting Started
 
-This plugin requires Grunt ~0.4.0
+This plugin requires Grunt ~0.4.1
 
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
@@ -78,17 +78,17 @@ Path to search files in stage of building tree. Relative to repository root dire
 
 #### options.valid
 Type: `Array`
-Default value: `[ '^\\/', '^https?:\\/\\/' ]`
+Default value: `[ '^\\/', '^https?:\\/\\/', '^data:image' ]`
 
 All valid URL masks represented as a list of `RexExp`-like strings.
 
 #### options.skip
 Type: `Array`
-Default value: `[ '^https?:\\/\\/' ]`
+Default value: `[ '^https?:\\/\\/', '^\\/\\/', '^data:image' ]`
 
 Defined URL masks which should be excluded during processing. Represented as a list of `RexExp`-like strings.
 
-### Usage Examples
+### Usage Example
 
 ```js
 grunt.initConfig({
