@@ -117,7 +117,7 @@ module.exports = function (grunt) {
                 if (reFilter.test(url) && !_.some(reSkip, function (re) { return re.test(url); })) {
                     // trim revision if any
                     url = url.replace(/(\?(.*))/g, '');             // ..query string parameter
-                    url = url.replace(/\.([0-9A-F]*\.)/ig, '.');    // ..part of pathname
+                    url = url.replace(/\.(~[0-9A-F]*\.)/ig, '.');   // ..part of pathname
 
                     // is file exists?
                     if (!fs.existsSync(options.prefix + url)) {
@@ -126,17 +126,19 @@ module.exports = function (grunt) {
 
                     var rev = tree[url];
 
-                    // uppercase revision
-                    if (options.upcased) {
-                        rev = rev.toUpperCase();
-                    }
+                    if (typeof rev !== 'undefined') {
+                        // uppercase revision
+                        if (options.upcased) {
+                            rev = rev.toUpperCase();
+                        }
 
-                    // implant revision into filename
-                    if (options.implant) {
-                        url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
-                    }
-                    else {
-                        url += '?' + rev;
+                        // implant revision into filename
+                        if (options.implant) {
+                            url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
+                        }
+                        else {
+                            url += '?' + rev;
+                        }
                     }
                 }
 
