@@ -100,6 +100,20 @@ Default value: `true`
 
 Allows embed revision into filename, e.g. `/i/navigation_sprite.F96A722.png`.
 
+#### options.autocommit
+Type: `Boolean`
+Default value: `true`
+
+Fixes uncommited changes in the repository. All new files will be added to the repository. As a commit message it uses
+value of `options.message`.
+
+#### options.message
+Type: `String`
+Default value: `Wave a magic wand (by urlrevs)`
+
+Message used at autocommit stage.
+
+
 ### Usage Example
 
 ```js
