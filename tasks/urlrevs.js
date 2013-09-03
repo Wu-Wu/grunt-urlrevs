@@ -24,7 +24,9 @@ module.exports = function (grunt) {
             valid       : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
             skip        : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ],
             implant     : true,
-            upcased     : true
+            upcased     : true,
+            autocommit  : true,
+            message     : 'Wave a magic wand (by urlrevs)'
         });
 
         // show options if verbose
@@ -35,8 +37,20 @@ module.exports = function (grunt) {
         git.status(options.filter, function (output, code) {
             if (!code) {
                 if (output.length) {
-                    grunt.verbose.writeln("Uncommited changes:\n" + output.join("\n"));
-                    grunt.fatal("Changes should be commited before running this task!");
+                    if (options.autocommit) {
+                        git.commit(options.message, function (message, success) {
+                            if (!success) {
+                                grunt.fatal(message);
+                            }
+                            else {
+                                grunt.log.ok(message);
+                            }
+                        });
+                    }
+                    else {
+                        grunt.verbose.writeln("Uncommited changes:\n" + output.join("\n"));
+                        grunt.fatal("Commit changes manually or set option 'autocommit: true' please.");
+                    }
                 }
             }
             else {

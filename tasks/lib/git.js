@@ -53,5 +53,37 @@ exports.Git = function (grunt) {
         callback(tree, lstree.code);
     };
 
+    // repository "git commit"
+    exports.commit = function (message, callback) {
+        var adding,
+            commiting,
+            retmsg = 'Successfully commited.',
+            result = false;
+
+        // trying to add files
+        adding = runCommand(
+            [ 'git', 'add', '--all' ]
+        );
+
+        if (!adding.code) {
+            // trying to commit changes
+            commiting = runCommand(
+                [ 'git', 'commit', '-a', '-m "' + message + '"' ]
+            );
+
+            if (commiting.code) {
+                retmsg = 'Unable to commit changes.';
+            }
+            else {
+                result = true;
+            }
+        }
+        else {
+            retmsg = 'Unable to add files.';
+        }
+
+        callback(retmsg, result);
+    };
+
     return exports;
 };
