@@ -38,7 +38,7 @@ module.exports = function (grunt) {
             if (!code) {
                 if (output.length) {
                     if (options.autocommit) {
-                        git.commit(options.message, function (message, success) {
+                        git.commit({ message: options.message, path: options.path }, function (message, success) {
                             if (!success) {
                                 grunt.fatal(message);
                             }
@@ -134,6 +134,7 @@ module.exports = function (grunt) {
 
                         // implant revision into filename
                         if (options.implant) {
+                            rev = '~' + rev;
                             url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
                         }
                         else {

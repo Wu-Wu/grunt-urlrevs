@@ -26,7 +26,7 @@ exports.Git = function (grunt) {
         var regex = new RegExp(masks, 'i');
 
         var status = runCommand(
-            [ 'git', 'status', '--porcelain' ]
+            [ 'git', 'status', '--porcelain', '--untracked-files=all' ]
         );
 
         callback(
@@ -54,7 +54,7 @@ exports.Git = function (grunt) {
     };
 
     // repository "git commit"
-    exports.commit = function (message, callback) {
+    exports.commit = function (params, callback) {
         var adding,
             commiting,
             retmsg = 'Successfully commited.',
@@ -62,13 +62,13 @@ exports.Git = function (grunt) {
 
         // trying to add files
         adding = runCommand(
-            [ 'git', 'add', '--all' ]
+            [ 'git', 'add', params.path ]
         );
 
         if (!adding.code) {
             // trying to commit changes
             commiting = runCommand(
-                [ 'git', 'commit', '-a', '-m "' + message + '"' ]
+                [ 'git', 'commit', '-m "' + params.message + '"' ]
             );
 
             if (commiting.code) {
