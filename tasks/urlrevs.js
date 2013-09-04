@@ -16,13 +16,17 @@ module.exports = function (grunt) {
     grunt.registerMultiTask("urlrevs", "Manage revisions in css urls", function () {
 
         var options = this.options({
-            abbrev : 6,
-            branch : 'HEAD',
-            filter : '\\.(png|jpg|jpeg|gif)',
-            path   : 'root/i',
-            prefix : 'root',
-            valid  : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
-            skip   : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ]
+            abbrev      : 6,
+            branch      : 'HEAD',
+            filter      : '\\.(png|jpg|jpeg|gif)',
+            path        : 'root/i',
+            prefix      : 'root',
+            valid       : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
+            skip        : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ],
+            implant     : true,
+            upcased     : true,
+            autocommit  : true,
+            message     : 'Wave a magic wand (by urlrevs)'
         });
 
         // show options if verbose
@@ -33,8 +37,20 @@ module.exports = function (grunt) {
         git.status(options.filter, function (output, code) {
             if (!code) {
                 if (output.length) {
-                    grunt.verbose.writeln("Uncommited changes:\n" + output.join("\n"));
-                    grunt.fatal("Changes should be commited before running this task!");
+                    if (options.autocommit) {
+                        git.commit({ message: options.message, path: options.path }, function (message, success) {
+                            if (!success) {
+                                grunt.fatal(message);
+                            }
+                            else {
+                                grunt.log.ok(message);
+                            }
+                        });
+                    }
+                    else {
+                        grunt.verbose.writeln("Uncommited changes:\n" + output.join("\n"));
+                        grunt.fatal("Commit changes manually or set option 'autocommit: true' please.");
+                    }
                 }
             }
             else {
@@ -43,10 +59,10 @@ module.exports = function (grunt) {
         });
 
         var lstree_opts = {
-            branch: options.branch,
-            abbrev: options.abbrev,
-            path:   options.path,
-            prefix: options.prefix
+            branch      : options.branch,
+            abbrev      : options.abbrev,
+            path        : options.path,
+            prefix      : options.prefix
         };
         grunt.verbose.writeln("Building images revisions tree..");
 
@@ -100,18 +116,34 @@ module.exports = function (grunt) {
                 // is file an image and should not be skipped?
                 if (reFilter.test(url) && !_.some(reSkip, function (re) { return re.test(url); })) {
                     // trim revision if any
-                    url = url.replace(/(\?(.*))/g, '');
+                    url = url.replace(/(\?(.*))/g, '');             // ..query string parameter
+                    url = url.replace(/\.(~[0-9A-F]*\.)/ig, '.');   // ..part of pathname
 
                     // is file exists?
                     if (!fs.existsSync(options.prefix + url)) {
                         grunt.fatal("File for " + url + " does not exist!");
                     }
-                    return util.format("url('%s?%s')", url, tree[url]);
+
+                    var rev = tree[url];
+
+                    if (typeof rev !== 'undefined') {
+                        // uppercase revision
+                        if (options.upcased) {
+                            rev = rev.toUpperCase();
+                        }
+
+                        // implant revision into filename
+                        if (options.implant) {
+                            rev = '~' + rev;
+                            url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
+                        }
+                        else {
+                            url += '?' + rev;
+                        }
+                    }
                 }
-                else {
-                    // not image or should be skipped
-                    return util.format("url('%s')", url);
-                }
+
+                return util.format("url('%s')", url);
             });
 
             // save changes
