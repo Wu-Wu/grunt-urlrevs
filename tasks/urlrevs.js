@@ -91,63 +91,112 @@ module.exports = function (grunt) {
             reValid  = _.map(options.valid, reCreateNew), // ..allowed urls
             reSkip   = _.map(options.skip, reCreateNew);  // ..skipped urls
 
+        var cssParser   = require('css-parse'),
+            cssCompiler = require('css-stringify'),
+            cssClean    = require('clean-css');
+
+        var maxLength = 70;
+
+        var properties = {
+            'background': 1,
+            'background-image': 1
+        };
+
         var changeUrls = function (filename, next) {
             grunt.log.writeln("Processing " + (filename).cyan + "...");
 
-            var content = grunt.file.read(filename).toString();
+            // build AST
+            var ast = cssParser(grunt.file.read(filename).toString(), { position: true });
 
-            var css = content.replace(/url(?:\s+)?\(([^\)]+)\)/igm, function (match, url) {
-                // trim spaces, quotes
-                url = url.replace(/^\s+|\s+$/g, '');
-                url = url.replace(/['"]/g, '');
+            // source file should be minified?
+            var isMin = _.last(ast["stylesheet"]["rules"]).position.end.line > 1 ? false : true;
 
-                // grunt.log.writeln(url);
+            // grunt.log.writeln("Minify CSS: " + (isMin ? ("YES").green : ("NO").yellow));
 
-                if (/^(\s+)?$/.test(url)) {
-                    grunt.fatal("Empty URLs are not supported!");
-                }
+            _.forEach(ast["stylesheet"]["rules"], function (rules) {
+                _.forEach(rules["declarations"], function (decl) {
+                    if (decl.type === "declaration" && properties[ decl.property ]) {
+                        var value = decl.value;
 
-                // is valid url?
-                var isValid = _.some(reValid, function (re) { return re.test(url); });
-                if (!isValid) {
-                    grunt.fatal("Invalid URL: " + url);
-                }
+                        // var subval = value.length > maxLength ? value.substring(0, maxLength - 1) : value;
+                        // grunt.log.writeln("OLD.DECL: " + (subval).magenta);
 
-                // is file an image and should not be skipped?
-                if (reFilter.test(url) && !_.some(reSkip, function (re) { return re.test(url); })) {
-                    // trim revision if any
-                    url = url.replace(/(\?(.*))/g, '');             // ..query string parameter
-                    url = url.replace(/\.(~[0-9A-F]*\.)/ig, '.');   // ..part of pathname
+                        value = value.replace(/url(?:\s+)?\(([^\)]+)\)/im, function (match, url) {
+                            // trim spaces, quotes
+                            url = url.replace(/^\s+|\s+$/g, '');
+                            url = url.replace(/['"]/g, '');
 
-                    // is file exists?
-                    if (!fs.existsSync(options.prefix + url)) {
-                        grunt.fatal("File for " + url + " does not exist!");
+                            if (/^(\s+)?$/.test(url)) {
+                                grunt.fatal("Empty URLs are not supported!");
+                            }
+
+                            var suburl = url.length > maxLength ? url.substring(0, maxLength - 1) : url;
+                            // grunt.log.writeln("OLD.URL : " + (suburl).blue);
+
+                            if (_.some(reSkip, function (re) { return re.test(url); })) {
+                                return;
+                            }
+
+                            // is valid url?
+                            var isValid = _.some(reValid, function (re) { return re.test(url); });
+                            if (!isValid) {
+                                grunt.fatal("Invalid URL: " + suburl);
+                            }
+
+                            // skip if not image
+                            if (!reFilter.test(url)) {
+                                return;
+                            }
+
+                            // trim revision if any
+                            url = url.replace(/(\?(.*))/g, '');             // ..query string parameter
+                            url = url.replace(/\.(~[0-9A-F]*\.)/ig, '.');   // ..part of pathname
+
+                            // is file exists?
+                            if (!fs.existsSync(options.prefix + url)) {
+                                grunt.fatal("File for " + url + " does not exist!");
+                            }
+
+                            var rev = tree[url];
+
+                            if (typeof rev !== "undefined") {
+                                // uppercase revision
+                                if (options.upcased) {
+                                    rev = rev.toUpperCase();
+                                }
+
+                                // implant revision into filename
+                                if (options.implant) {
+                                    rev = '~' + rev;
+                                    url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
+                                }
+                                else {
+                                    url += '?' + rev;
+                                }
+                            }
+
+                            // grunt.log.writeln("NEW.URL : " + (url).green);
+                            return util.format("url('%s')", url);
+                        });
+
+                        if (typeof value !== "undefined" && !/^undefined/.test(value)) {
+                            // var subval = value.length > maxLength ? value.substring(0, maxLength - 1) : value;
+                            // grunt.log.writeln("VALUE   : " + (subval).red);
+                            decl.value = value;
+                        }
                     }
-
-                    var rev = tree[url];
-
-                    if (typeof rev !== 'undefined') {
-                        // uppercase revision
-                        if (options.upcased) {
-                            rev = rev.toUpperCase();
-                        }
-
-                        // implant revision into filename
-                        if (options.implant) {
-                            rev = '~' + rev;
-                            url = url.replace(/(.*)\.(.*)/i, function (match, file, ext) { return [file, rev, ext].join('.'); });
-                        }
-                        else {
-                            url += '?' + rev;
-                        }
-                    }
-                }
-
-                return util.format("url('%s')", url);
+                });
             });
 
+            // compile AST to CSS-string
+            var content = cssCompiler(ast, { compress: false }) + "\n";
+
+            if (isMin) {
+                content = cssClean.process(content, {});
+            }
+
             // save changes
-            grunt.file.write(filename, css);
+            grunt.file.write(filename, content);
             next();
         };
 
