@@ -11,7 +11,8 @@
 module.exports = function (grunt) {
     var git  = require('./lib/git').Git(grunt),
         fs   = require('fs'),
-        util = require('util');
+        util = require('util'),
+        css  = require('./lib/css').CSS(grunt);
 
     grunt.registerMultiTask("urlrevs", "Manage revisions in css urls", function () {
 
@@ -91,10 +92,6 @@ module.exports = function (grunt) {
             reValid  = _.map(options.valid, reCreateNew), // ..allowed urls
             reSkip   = _.map(options.skip, reCreateNew);  // ..skipped urls
 
-        var cssParser   = require('css-parse'),
-            cssCompiler = require('css-stringify'),
-            cssClean    = require('clean-css');
-
         var maxLength = 70;
 
         var properties = {
@@ -106,7 +103,7 @@ module.exports = function (grunt) {
             grunt.log.writeln("Processing " + (filename).cyan + "...");
 
             // build AST
-            var ast = cssParser(grunt.file.read(filename).toString(), { position: true });
+            var ast = css.parseAST(grunt.file.read(filename).toString(), { position: true });
 
             // source file should be minified?
             var isMin = _.last(ast["stylesheet"]["rules"]).position.end.line > 1 ? false : true;
@@ -189,10 +186,10 @@ module.exports = function (grunt) {
             });
 
             // compile AST to CSS-string
-            var content = cssCompiler(ast, { compress: false }) + "\n";
+            var content = css.compileAST(ast, { compress: false }) + "\n";
 
             if (isMin) {
-                content = cssClean.process(content, {});
+                content = css.cleanCSS(content);
             }
 
             // save changes
