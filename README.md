@@ -78,13 +78,13 @@ Path to search files in stage of building tree. Relative to repository root dire
 
 #### options.valid
 Type: `Array`
-Default value: `[ '^\\/', '^https?:\\/\\/', '^data:image' ]`
+Default value: `[ '^\\/' ]`
 
 All valid URL masks represented as a list of `RexExp`-like strings.
 
 #### options.skip
 Type: `Array`
-Default value: `[ '^https?:\\/\\/', '^\\/\\/', '^data:image' ]`
+Default value: `[ '^https?:\\/\\/', '^\\/\\/', '^data:image\\/(sv|pn)g', '^%23' ]`
 
 Defined URL masks which should be excluded during processing. Represented as a list of `RexExp`-like strings.
 
