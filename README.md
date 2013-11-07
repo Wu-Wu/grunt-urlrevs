@@ -1,6 +1,8 @@
 grunt-urlrevs
 =============
 
+[![build status](https://secure.travis-ci.org/Wu-Wu/grunt-urlrevs.png)](https://travis-ci.org/Wu-Wu/grunt-urlrevs)
+
 > Manage revisions in CSS urls.
 
 ## Getting Started
