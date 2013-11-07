@@ -21,8 +21,8 @@ module.exports = function (grunt) {
             filter      : '\\.(png|jpg|jpeg|gif)',
             path        : 'root/i',
             prefix      : 'root',
-            valid       : [ '^\\/', '^https?:\\/\\/', '^data:image' ],
-            skip        : [ '^https?:\\/\\/', '^\\/\\/', '^data:image' ],
+            valid       : [ '^\\/' ],
+            skip        : [ '^https?:\\/\\/', '^\\/\\/', '^data:image\\/(sv|pn)g', '^%23' ],
             implant     : true,
             upcased     : true,
             autocommit  : true,
@@ -101,10 +101,13 @@ module.exports = function (grunt) {
                 url = url.replace(/^\s+|\s+$/g, '');
                 url = url.replace(/['"]/g, '');
 
-                // grunt.log.writeln(url);
-
                 if (/^(\s+)?$/.test(url)) {
                     grunt.fatal("Empty URLs are not supported!");
+                }
+
+                if (_.some(reSkip, function (re) { return re.test(url); })) {
+                    // return AS IS
+                    return match;
                 }
 
                 // is valid url?
@@ -113,8 +116,8 @@ module.exports = function (grunt) {
                     grunt.fatal("Invalid URL: " + url);
                 }
 
-                // is file an image and should not be skipped?
-                if (reFilter.test(url) && !_.some(reSkip, function (re) { return re.test(url); })) {
+                // is file an image?
+                if (reFilter.test(url)) {
                     // trim revision if any
                     url = url.replace(/(\?(.*))/g, '');             // ..query string parameter
                     url = url.replace(/\.(~[0-9A-F]*\.)/ig, '.');   // ..part of pathname
